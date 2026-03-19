@@ -1,15 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { DashboardSummary } from '../../interface/dashboard.interface';
 import {
   CreateStockItemRequest,
-  CreateSupplierRequest,
-  DashboardSummary,
   LowStockAlert,
   StockItem,
-  Supplier,
   UpdateStockItemRequest,
+} from '../../interface/inventory.interface';
+import {
+  CreateSupplierRequest,
+  Supplier,
   UpdateSupplierRequest,
-} from './warehouse-models';
+} from '../../interface/supplier.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -60,4 +62,3 @@ export class WarehouseApiService {
     return this.http.post<StockItem>(`${this.apiBaseUrl}/inventory/${stockItemId}/receipts`, { quantity });
   }
 }
-

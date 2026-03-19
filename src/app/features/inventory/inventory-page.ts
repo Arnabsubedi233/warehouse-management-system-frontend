@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { forkJoin } from 'rxjs';
-import { WarehouseApiService } from '../../core/warehouse-api.service';
-import { CreateStockItemRequest, LowStockAlert, StockItem, Supplier } from '../../core/warehouse-models';
+import { CreateStockItemRequest, LowStockAlert, StockItem } from '../../interface/inventory.interface';
+import { Supplier } from '../../interface/supplier.interface';
+import { WarehouseApiService } from '../../services/warehouse-api/warehouse-api.service';
 
 @Component({
   selector: 'app-inventory-page',

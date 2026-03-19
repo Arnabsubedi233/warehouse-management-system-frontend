@@ -57,7 +57,8 @@ Current local configuration:
 
 ```text
 src/app
-|- core
+|- interface
+|- services/warehouse-api
 |- features/dashboard
 |- features/suppliers
 |- features/inventory
