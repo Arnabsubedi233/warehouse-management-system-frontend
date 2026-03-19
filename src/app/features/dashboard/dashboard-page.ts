@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { WarehouseApiService } from '../../core/warehouse-api.service';
+import { DashboardSummary } from '../../core/warehouse-models';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -6,26 +8,29 @@ import { Component } from '@angular/core';
   standalone: false,
   styleUrl: './dashboard-page.scss'
 })
-export class DashboardPageComponent {
-  protected readonly milestoneCards = [
-    {
-      title: 'Design',
-      detail: 'Architecture notes, UML candidates, and project proposal are prepared first so later code has a defensible rationale.'
-    },
-    {
-      title: 'Implementation',
-      detail: 'The first backend slice already demonstrates encapsulation, composition, inheritance, and repository abstraction.'
-    },
-    {
-      title: 'Testing',
-      detail: 'Domain rules are being covered early so the report can reference concrete automated evidence.'
-    }
-  ];
+export class DashboardPageComponent implements OnInit {
+  protected summary: DashboardSummary | null = null;
+  protected loading = true;
+  protected error = '';
 
-  protected readonly nextPrs = [
-    'Supplier and inventory CRUD workflows',
-    'Order processing and financial reporting services',
-    'Angular forms and backend integration'
-  ];
+  constructor(private readonly warehouseApiService: WarehouseApiService) {}
+
+  ngOnInit(): void {
+    this.loadSummary();
+  }
+
+  protected loadSummary(): void {
+    this.loading = true;
+    this.error = '';
+    this.warehouseApiService.getDashboardSummary().subscribe({
+      next: (summary) => {
+        this.summary = summary;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'The dashboard could not load data from the service.';
+        this.loading = false;
+      }
+    });
+  }
 }
-

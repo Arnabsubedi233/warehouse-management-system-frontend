@@ -6,48 +6,47 @@
 .shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 300px 1fr;
   background:
-    radial-gradient(circle at top left, rgba(209, 122, 34, 0.28), transparent 32%),
-    radial-gradient(circle at bottom right, rgba(13, 148, 136, 0.18), transparent 28%),
-    linear-gradient(180deg, #f8f5ef 0%, #efe7da 100%);
+    radial-gradient(circle at top left, rgba(216, 133, 28, 0.24), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(5, 94, 88, 0.14), transparent 28%),
+    linear-gradient(180deg, #f7f4ee 0%, #ebe2d6 100%);
 }
 
 .shell__sidebar {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 2rem 1.5rem;
-  background: rgba(19, 33, 39, 0.94);
-  color: #f9f4eb;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2rem 1.4rem;
+  background: rgba(23, 34, 41, 0.95);
+  color: #f6f1e8;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .shell__brand {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
-.shell__eyebrow,
 .shell__kicker {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-size: 0.72rem;
-  color: #e6c58c;
+  color: #dcb470;
 }
 
 .shell__title {
   margin: 0;
-  font-size: 2rem;
-  line-height: 1;
+  font-size: 2.05rem;
+  line-height: 1.02;
 }
 
 .shell__subtitle,
-.shell__branch-summary {
+.shell__summary {
   margin: 0;
-  color: rgba(249, 244, 235, 0.78);
-  line-height: 1.55;
+  color: rgba(246, 241, 232, 0.8);
+  line-height: 1.6;
 }
 
 .shell__nav {
@@ -73,8 +72,8 @@
 }
 
 .shell__nav-link--active {
-  background: rgba(230, 197, 140, 0.15);
-  border-color: rgba(230, 197, 140, 0.45);
+  background: rgba(220, 180, 112, 0.16);
+  border-color: rgba(220, 180, 112, 0.45);
 }
 
 .shell__nav-label {
@@ -83,7 +82,7 @@
 
 .shell__nav-hint {
   font-size: 0.92rem;
-  color: rgba(249, 244, 235, 0.78);
+  color: rgba(246, 241, 232, 0.78);
 }
 
 .shell__main {
@@ -102,19 +101,19 @@
 
 .shell__header h2 {
   margin: 0.4rem 0 0;
-  font-size: clamp(1.8rem, 2.8vw, 2.8rem);
+  font-size: clamp(1.8rem, 2.6vw, 2.7rem);
   line-height: 1.05;
-  color: #152127;
-  max-width: 14ch;
+  color: #1a2730;
+  max-width: 13ch;
 }
 
 .shell__badge {
   max-width: 24rem;
   padding: 1rem 1.1rem;
   border-radius: 1rem;
-  background: rgba(255, 250, 242, 0.78);
-  border: 1px solid rgba(21, 33, 39, 0.08);
-  color: #31424a;
+  background: rgba(255, 250, 242, 0.82);
+  border: 1px solid rgba(26, 39, 48, 0.08);
+  color: #304049;
   line-height: 1.5;
   box-shadow: 0 18px 45px rgba(67, 50, 24, 0.08);
 }
@@ -126,6 +125,10 @@
 @media (max-width: 960px) {
   .shell {
     grid-template-columns: 1fr;
+  }
+
+  .shell__sidebar {
+    padding-bottom: 1rem;
   }
 
   .shell__header {

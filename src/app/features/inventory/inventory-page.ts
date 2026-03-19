@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { forkJoin } from 'rxjs';
+import { WarehouseApiService } from '../../core/warehouse-api.service';
+import { CreateStockItemRequest, LowStockAlert, StockItem, Supplier } from '../../core/warehouse-models';
 
 @Component({
   selector: 'app-inventory-page',
@@ -6,17 +9,100 @@ import { Component } from '@angular/core';
   standalone: false,
   styleUrl: './inventory-page.scss'
 })
-export class InventoryPageComponent {
-  protected readonly businessRules = [
-    'Stock quantity must never drop below zero',
-    'Low stock should trigger when quantity reaches or falls below the reorder threshold',
-    'Receiving stock and allocating stock should be separate domain behaviours'
-  ];
+export class InventoryPageComponent implements OnInit {
+  protected stockItems: StockItem[] = [];
+  protected suppliers: Supplier[] = [];
+  protected lowStockAlerts: LowStockAlert[] = [];
+  protected loading = true;
+  protected saving = false;
+  protected error = '';
+  protected success = '';
+  protected receiptQuantities: Record<string, number> = {};
+  protected draft: CreateStockItemRequest = {
+    sku: '',
+    name: '',
+    supplierId: '',
+    unitCost: 0,
+    quantityOnHand: 0,
+    reorderThreshold: 0
+  };
 
-  protected readonly testingIdeas = [
-    'Allocating more than available stock should raise an error',
-    'Receiving stock should increase the quantity on hand',
-    'Status should move between NORMAL, LOW, and OUT_OF_STOCK correctly'
-  ];
+  constructor(private readonly warehouseApiService: WarehouseApiService) {}
+
+  ngOnInit(): void {
+    this.loadInventory();
+  }
+
+  protected loadInventory(): void {
+    this.loading = true;
+    this.error = '';
+    forkJoin({
+      stockItems: this.warehouseApiService.listStockItems(),
+      suppliers: this.warehouseApiService.listSuppliers(),
+      lowStockAlerts: this.warehouseApiService.listLowStockAlerts()
+    }).subscribe({
+      next: ({ stockItems, suppliers, lowStockAlerts }) => {
+        this.stockItems = stockItems;
+        this.suppliers = suppliers;
+        this.lowStockAlerts = lowStockAlerts;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Inventory data could not be loaded.';
+        this.loading = false;
+      }
+    });
+  }
+
+  protected submitStockItem(): void {
+    this.saving = true;
+    this.error = '';
+    this.success = '';
+    this.warehouseApiService.createStockItem({
+      ...this.draft,
+      unitCost: Number(this.draft.unitCost),
+      quantityOnHand: Number(this.draft.quantityOnHand),
+      reorderThreshold: Number(this.draft.reorderThreshold)
+    }).subscribe({
+      next: () => {
+        this.draft = {
+          sku: '',
+          name: '',
+          supplierId: '',
+          unitCost: 0,
+          quantityOnHand: 0,
+          reorderThreshold: 0
+        };
+        this.success = 'Stock item saved successfully.';
+        this.saving = false;
+        this.loadInventory();
+      },
+      error: () => {
+        this.error = 'The stock item could not be saved.';
+        this.saving = false;
+      }
+    });
+  }
+
+  protected receiveStock(stockItem: StockItem): void {
+    const quantity = Number(this.receiptQuantities[stockItem.id] ?? 0);
+    if (quantity < 1) {
+      this.error = 'Receipt quantity must be at least 1.';
+      this.success = '';
+      return;
+    }
+
+    this.error = '';
+    this.success = '';
+    this.warehouseApiService.receiveStock(stockItem.id, quantity).subscribe({
+      next: () => {
+        this.receiptQuantities[stockItem.id] = 0;
+        this.success = `Received ${quantity} units into ${stockItem.name}.`;
+        this.loadInventory();
+      },
+      error: () => {
+        this.error = 'The stock receipt could not be processed.';
+      }
+    });
+  }
 }
-

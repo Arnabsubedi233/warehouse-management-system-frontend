@@ -1,26 +1,15 @@
-<section class="feature-page">
-  <article class="feature-page__intro">
-    <p class="feature-page__eyebrow">Order Processing</p>
-    <h3>Model orders as aggregates with an explicit lifecycle.</h3>
-    <p>
-      This area is ideal for composition because a `CustomerOrder` owns multiple `OrderLine` objects. It also gives you a natural sequence diagram for the report.
+<section class="page">
+  <header class="page__header">
+    <div>
+      <p class="page__eyebrow">Orders</p>
+      <h3>Order processing</h3>
+      <p>{{ statusMessage }}</p>
+    </div>
+  </header>
+
+  <article class="panel">
+    <p class="empty-state">
+      The order workflow screen will be connected here as soon as the corresponding backend endpoints are available.
     </p>
   </article>
-
-  <div class="feature-grid">
-    <article class="feature-card">
-      <p class="feature-card__title">Lifecycle</p>
-      <ul>
-        <li *ngFor="let item of lifecycle">{{ item }}</li>
-      </ul>
-    </article>
-
-    <article class="feature-card">
-      <p class="feature-card__title">Sequence Diagram Notes</p>
-      <ul>
-        <li *ngFor="let item of sequenceDiagramNotes">{{ item }}</li>
-      </ul>
-    </article>
-  </div>
 </section>
-

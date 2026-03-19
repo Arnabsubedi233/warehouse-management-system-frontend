@@ -1,30 +1,94 @@
 <section class="page">
-  <div class="page__hero">
+  <header class="page__header">
     <div>
-      <p class="page__eyebrow">Phase 1</p>
-      <h3>Project setup and report-ready structure</h3>
-      <p class="page__copy">
-        This dashboard acts as a live project brief. It shows how the repository, design artifacts, and codebase are being organised to satisfy the assignment requirements progressively.
-      </p>
+      <p class="page__eyebrow">Dashboard</p>
+      <h3>Warehouse snapshot</h3>
+      <p>Live totals from the local warehouse service.</p>
     </div>
-    <div class="page__spotlight">
-      <p class="page__spotlight-label">Current emphasis</p>
-      <p>Separate workspaces, layered backend design, UML starters, and a proposal that can be exported to PDF.</p>
-    </div>
-  </div>
+    <button class="button button--secondary" type="button" (click)="loadSummary()" [disabled]="loading">
+      Refresh
+    </button>
+  </header>
 
-  <div class="grid">
-    <article class="card" *ngFor="let card of milestoneCards">
-      <p class="card__label">{{ card.title }}</p>
-      <p class="card__text">{{ card.detail }}</p>
+  <p class="notice notice--error" *ngIf="error">{{ error }}</p>
+  <p class="empty-state" *ngIf="loading">Loading dashboard data...</p>
+
+  <div class="metric-grid" *ngIf="summary as data">
+    <article class="metric">
+      <p class="metric__label">Active Suppliers</p>
+      <p class="metric__value">{{ data.activeSuppliers }}</p>
+      <p class="metric__hint">Suppliers currently available for stock items.</p>
+    </article>
+
+    <article class="metric">
+      <p class="metric__label">Tracked Items</p>
+      <p class="metric__value">{{ data.trackedItems }}</p>
+      <p class="metric__hint">Inventory records currently in the service.</p>
+    </article>
+
+    <article class="metric">
+      <p class="metric__label">Open Orders</p>
+      <p class="metric__value">{{ data.openOrders }}</p>
+      <p class="metric__hint">Orders still waiting for fulfilment.</p>
+    </article>
+
+    <article class="metric">
+      <p class="metric__label">Net Cash Position</p>
+      <p class="metric__value">{{ data.netCashPosition | currency: 'GBP' }}</p>
+      <p class="metric__hint">Current total from purchase and sale transactions.</p>
     </article>
   </div>
 
-  <article class="panel">
-    <p class="panel__title">Next PR candidates</p>
-    <ul class="panel__list">
-      <li *ngFor="let item of nextPrs">{{ item }}</li>
-    </ul>
-  </article>
-</section>
+  <div class="panel-grid" *ngIf="summary as data">
+    <section class="panel">
+      <div class="panel__header">
+        <h4>Order Value</h4>
+        <span class="badge">{{ data.openOrders }} open</span>
+      </div>
+      <p class="metric__value">{{ data.openOrderValue | currency: 'GBP' }}</p>
+      <p class="metric__hint">Combined value of open orders currently held by the service.</p>
+    </section>
 
+    <section class="panel table-card">
+      <div class="panel__header">
+        <h4>Low-Stock Alerts</h4>
+        <span class="badge" [class.badge--danger]="data.lowStockItems > 0">{{ data.lowStockItems }} alerts</span>
+      </div>
+
+      <div class="table-wrap" *ngIf="data.lowStockAlerts.length > 0; else noAlerts">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Item</th>
+              <th>Quantity</th>
+              <th>Threshold</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let alert of data.lowStockAlerts">
+              <td>{{ alert.sku }}</td>
+              <td>{{ alert.itemName }}</td>
+              <td>{{ alert.quantityOnHand }}</td>
+              <td>{{ alert.reorderThreshold }}</td>
+              <td>
+                <span
+                  class="stock-status"
+                  [class.stock-status--low]="alert.status === 'LOW'"
+                  [class.stock-status--out-of-stock]="alert.status === 'OUT_OF_STOCK'"
+                >
+                  {{ alert.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #noAlerts>
+        <p class="empty-state">No low-stock items are currently flagged.</p>
+      </ng-template>
+    </section>
+  </div>
+</section>

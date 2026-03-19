@@ -1,26 +1,167 @@
-<section class="feature-page">
-  <article class="feature-page__intro">
-    <p class="feature-page__eyebrow">Inventory Management</p>
-    <h3>Use the inventory model to demonstrate clear business rules.</h3>
-    <p>
-      Inventory is one of the strongest places to show object-oriented design because stock rules belong inside the `StockItem` model rather than being scattered through controllers or UI code.
-    </p>
-  </article>
+<section class="page">
+  <header class="page__header">
+    <div>
+      <p class="page__eyebrow">Inventory</p>
+      <h3>Inventory management</h3>
+      <p>View stock levels, register new items, and receive incoming stock.</p>
+    </div>
+  </header>
 
-  <div class="feature-grid">
-    <article class="feature-card">
-      <p class="feature-card__title">Business Rules</p>
-      <ul>
-        <li *ngFor="let item of businessRules">{{ item }}</li>
-      </ul>
+  <p class="notice notice--error" *ngIf="error">{{ error }}</p>
+  <p class="notice notice--success" *ngIf="success">{{ success }}</p>
+  <p class="empty-state" *ngIf="loading">Loading inventory...</p>
+
+  <div class="panel-grid">
+    <article class="panel">
+      <h4>Add stock item</h4>
+      <form class="form" (ngSubmit)="submitStockItem()" #stockForm="ngForm">
+        <div class="form-grid">
+          <label class="field">
+            <span>SKU</span>
+            <input name="sku" [(ngModel)]="draft.sku" required />
+          </label>
+
+          <label class="field">
+            <span>Item name</span>
+            <input name="name" [(ngModel)]="draft.name" required />
+          </label>
+
+          <label class="field field--full">
+            <span>Supplier</span>
+            <select name="supplierId" [(ngModel)]="draft.supplierId" required>
+              <option value="" disabled>Select supplier</option>
+              <option *ngFor="let supplier of suppliers" [value]="supplier.id">
+                {{ supplier.name }}
+              </option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Unit cost</span>
+            <input name="unitCost" type="number" min="0.01" step="0.01" [(ngModel)]="draft.unitCost" required />
+          </label>
+
+          <label class="field">
+            <span>Opening quantity</span>
+            <input name="quantityOnHand" type="number" min="0" step="1" [(ngModel)]="draft.quantityOnHand" required />
+          </label>
+
+          <label class="field field--full">
+            <span>Reorder threshold</span>
+            <input name="reorderThreshold" type="number" min="0" step="1" [(ngModel)]="draft.reorderThreshold" required />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="button" type="submit" [disabled]="saving || stockForm.invalid">
+            Save item
+          </button>
+        </div>
+      </form>
     </article>
 
-    <article class="feature-card">
-      <p class="feature-card__title">Testing Ideas</p>
-      <ul>
-        <li *ngFor="let item of testingIdeas">{{ item }}</li>
-      </ul>
+    <article class="panel table-card">
+      <div class="panel__header">
+        <h4>Low-stock alerts</h4>
+        <span class="badge" [class.badge--danger]="lowStockAlerts.length > 0">{{ lowStockAlerts.length }} alerts</span>
+      </div>
+
+      <div class="table-wrap" *ngIf="lowStockAlerts.length > 0; else noAlerts">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Item</th>
+              <th>Quantity</th>
+              <th>Threshold</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let alert of lowStockAlerts">
+              <td>{{ alert.sku }}</td>
+              <td>{{ alert.name }}</td>
+              <td>{{ alert.quantityOnHand }}</td>
+              <td>{{ alert.reorderThreshold }}</td>
+              <td>
+                <span
+                  class="stock-status"
+                  [class.stock-status--low]="alert.status === 'LOW'"
+                  [class.stock-status--out-of-stock]="alert.status === 'OUT_OF_STOCK'"
+                  [class.stock-status--normal]="alert.status === 'NORMAL'"
+                >
+                  {{ alert.status }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #noAlerts>
+        <p class="empty-state">No low-stock alerts are currently active.</p>
+      </ng-template>
     </article>
   </div>
-</section>
 
+  <article class="panel table-card">
+    <div class="panel__header">
+      <h4>Inventory records</h4>
+      <span class="badge">{{ stockItems.length }} items</span>
+    </div>
+
+    <div class="table-wrap" *ngIf="stockItems.length > 0; else noInventory">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Item</th>
+            <th>Supplier</th>
+            <th>Unit Cost</th>
+            <th>Quantity</th>
+            <th>Status</th>
+            <th>Receive Stock</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let stockItem of stockItems">
+            <td>{{ stockItem.sku }}</td>
+            <td>{{ stockItem.name }}</td>
+            <td>{{ stockItem.supplierName }}</td>
+            <td>{{ stockItem.unitCost | currency: 'GBP' }}</td>
+            <td>{{ stockItem.quantityOnHand }}</td>
+            <td>
+              <span
+                class="stock-status"
+                [class.stock-status--low]="stockItem.status === 'LOW'"
+                [class.stock-status--out-of-stock]="stockItem.status === 'OUT_OF_STOCK'"
+                [class.stock-status--normal]="stockItem.status === 'NORMAL'"
+              >
+                {{ stockItem.status }}
+              </span>
+            </td>
+            <td>
+              <div class="inline-receipt">
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  [(ngModel)]="receiptQuantities[stockItem.id]"
+                  [ngModelOptions]="{ standalone: true }"
+                  placeholder="Qty"
+                />
+                <button class="link-button" type="button" (click)="receiveStock(stockItem)">
+                  Receive
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #noInventory>
+      <p class="empty-state">No stock items are currently stored in the service.</p>
+    </ng-template>
+  </article>
+</section>

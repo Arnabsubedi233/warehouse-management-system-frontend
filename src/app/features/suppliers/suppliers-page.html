@@ -1,26 +1,105 @@
-<section class="feature-page">
-  <article class="feature-page__intro">
-    <p class="feature-page__eyebrow">Supplier Management</p>
-    <h3>Start with a clean supplier aggregate and explicit contact rules.</h3>
-    <p>
-      This feature area should remain small and clear. It is a strong place to demonstrate encapsulation because supplier contact details and status changes can be controlled through business methods.
-    </p>
-  </article>
+<section class="page">
+  <header class="page__header">
+    <div>
+      <p class="page__eyebrow">Suppliers</p>
+      <h3>Supplier management</h3>
+      <p>Create supplier records and manage whether they are active in the system.</p>
+    </div>
+  </header>
 
-  <div class="feature-grid">
-    <article class="feature-card">
-      <p class="feature-card__title">Implementation Focus</p>
-      <ul>
-        <li *ngFor="let item of responsibilities">{{ item }}</li>
-      </ul>
+  <p class="notice notice--error" *ngIf="error">{{ error }}</p>
+  <p class="notice notice--success" *ngIf="success">{{ success }}</p>
+  <p class="empty-state" *ngIf="loading">Loading suppliers...</p>
+
+  <div class="panel-grid">
+    <article class="panel">
+      <h4>Add supplier</h4>
+      <form class="form" (ngSubmit)="submitSupplier()" #supplierForm="ngForm">
+        <div class="form-grid">
+          <label class="field field--full">
+            <span>Supplier name</span>
+            <input name="name" [(ngModel)]="draft.name" required />
+          </label>
+
+          <label class="field">
+            <span>Contact name</span>
+            <input name="contactName" [(ngModel)]="draft.contactName" required />
+          </label>
+
+          <label class="field">
+            <span>Email</span>
+            <input name="email" type="email" [(ngModel)]="draft.email" required />
+          </label>
+
+          <label class="field field--full">
+            <span>Phone number</span>
+            <input name="phoneNumber" [(ngModel)]="draft.phoneNumber" required />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="button" type="submit" [disabled]="saving || supplierForm.invalid">
+            Save supplier
+          </button>
+        </div>
+      </form>
     </article>
 
-    <article class="feature-card">
-      <p class="feature-card__title">UML Notes</p>
-      <ul>
-        <li *ngFor="let item of umlNotes">{{ item }}</li>
-      </ul>
+    <article class="panel table-card">
+      <div class="panel__header">
+        <h4>Supplier records</h4>
+        <span class="badge">{{ suppliers.length }} suppliers</span>
+      </div>
+
+      <div class="table-wrap" *ngIf="suppliers.length > 0; else emptySuppliers">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Contact</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let supplier of suppliers">
+              <td>{{ supplier.name }}</td>
+              <td>{{ supplier.contactName }}</td>
+              <td>{{ supplier.email }}</td>
+              <td>{{ supplier.phoneNumber }}</td>
+              <td>
+                <span class="pill" [class.pill--active]="supplier.active" [class.pill--inactive]="!supplier.active">
+                  {{ supplier.active ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="table__actions">
+                <button
+                  class="link-button"
+                  type="button"
+                  (click)="toggleStatus(supplier)"
+                  [disabled]="busySupplierId === supplier.id"
+                >
+                  {{ supplier.active ? 'Deactivate' : 'Activate' }}
+                </button>
+                <button
+                  class="link-button link-button--danger"
+                  type="button"
+                  (click)="deleteSupplier(supplier)"
+                  [disabled]="busySupplierId === supplier.id"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #emptySuppliers>
+        <p class="empty-state">No supplier records have been created yet.</p>
+      </ng-template>
     </article>
   </div>
 </section>
-

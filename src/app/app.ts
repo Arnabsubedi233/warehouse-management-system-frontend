@@ -8,35 +8,35 @@ import { Component } from '@angular/core';
 })
 export class App {
   protected readonly title = 'Warehouse Management System';
-  protected readonly subtitle = 'BNU Industry Solutions Ltd';
+  protected readonly subtitle = 'Service Interface';
 
   protected readonly navigation = [
     {
       label: 'Dashboard',
       route: '/dashboard',
-      hint: 'Architecture and delivery overview'
+      hint: 'Overview and live totals'
     },
     {
       label: 'Suppliers',
       route: '/suppliers',
-      hint: 'Supplier management design notes'
+      hint: 'Manage supplier records'
     },
     {
       label: 'Inventory',
       route: '/inventory',
-      hint: 'Stock control and low-stock rules'
+      hint: 'Track stock and receipts'
     },
     {
       label: 'Orders',
       route: '/orders',
-      hint: 'Order lifecycle and fulfilment flow'
+      hint: 'Order screens'
     },
     {
       label: 'Finance',
       route: '/finance',
-      hint: 'Transaction hierarchy and reporting'
+      hint: 'Finance screens'
     }
   ];
 
-  protected readonly branchSummary = 'Current branch: setup, proposal, architecture, and application shells.';
+  protected readonly summary = 'Use the navigation to work with warehouse data through the backend service.';
 }
