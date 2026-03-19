@@ -1,0 +1,26 @@
+<section class="feature-page">
+  <article class="feature-page__intro">
+    <p class="feature-page__eyebrow">Financial Reporting</p>
+    <h3>Use this module to make inheritance and polymorphism explicit.</h3>
+    <p>
+      The finance area is where the report can clearly explain object-oriented reasoning. A shared abstract transaction type keeps common state centralised while subclasses define their financial effect.
+    </p>
+  </article>
+
+  <div class="feature-grid">
+    <article class="feature-card">
+      <p class="feature-card__title">OO Highlights</p>
+      <ul>
+        <li *ngFor="let item of ooHighlights">{{ item }}</li>
+      </ul>
+    </article>
+
+    <article class="feature-card">
+      <p class="feature-card__title">Target Reports</p>
+      <ul>
+        <li *ngFor="let item of reportOutputs">{{ item }}</li>
+      </ul>
+    </article>
+  </div>
+</section>
+

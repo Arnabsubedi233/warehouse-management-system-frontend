@@ -1,0 +1,39 @@
+<div class="shell">
+  <aside class="shell__sidebar">
+    <div class="shell__brand">
+      <p class="shell__eyebrow">COM5043 Object Oriented Programming</p>
+      <h1 class="shell__title">{{ title }}</h1>
+      <p class="shell__subtitle">{{ subtitle }}</p>
+    </div>
+
+    <p class="shell__branch-summary">{{ branchSummary }}</p>
+
+    <nav class="shell__nav" aria-label="Primary">
+      <a
+        *ngFor="let item of navigation"
+        class="shell__nav-link"
+        [routerLink]="item.route"
+        routerLinkActive="shell__nav-link--active"
+      >
+        <span class="shell__nav-label">{{ item.label }}</span>
+        <span class="shell__nav-hint">{{ item.hint }}</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="shell__main">
+    <header class="shell__header">
+      <div>
+        <p class="shell__kicker">Progressive Delivery Plan</p>
+        <h2>Build the solution in evidence-friendly increments.</h2>
+      </div>
+      <div class="shell__badge">
+        Frontend and backend remain separate while the business logic stays in the Spring Boot domain model.
+      </div>
+    </header>
+
+    <section class="shell__route">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>

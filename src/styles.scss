@@ -1,0 +1,26 @@
+/* You can add global styles to this file, and also import other style files */
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+  color: #152127;
+  background: #f4ecdf;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Iowan Old Style", "Palatino Linotype", serif;
+}
+
+a {
+  color: inherit;
+}

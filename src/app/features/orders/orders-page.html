@@ -1,0 +1,26 @@
+<section class="feature-page">
+  <article class="feature-page__intro">
+    <p class="feature-page__eyebrow">Order Processing</p>
+    <h3>Model orders as aggregates with an explicit lifecycle.</h3>
+    <p>
+      This area is ideal for composition because a `CustomerOrder` owns multiple `OrderLine` objects. It also gives you a natural sequence diagram for the report.
+    </p>
+  </article>
+
+  <div class="feature-grid">
+    <article class="feature-card">
+      <p class="feature-card__title">Lifecycle</p>
+      <ul>
+        <li *ngFor="let item of lifecycle">{{ item }}</li>
+      </ul>
+    </article>
+
+    <article class="feature-card">
+      <p class="feature-card__title">Sequence Diagram Notes</p>
+      <ul>
+        <li *ngFor="let item of sequenceDiagramNotes">{{ item }}</li>
+      </ul>
+    </article>
+  </div>
+</section>
+

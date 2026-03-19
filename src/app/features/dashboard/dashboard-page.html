@@ -1,0 +1,30 @@
+<section class="page">
+  <div class="page__hero">
+    <div>
+      <p class="page__eyebrow">Phase 1</p>
+      <h3>Project setup and report-ready structure</h3>
+      <p class="page__copy">
+        This dashboard acts as a live project brief. It shows how the repository, design artifacts, and codebase are being organised to satisfy the assignment requirements progressively.
+      </p>
+    </div>
+    <div class="page__spotlight">
+      <p class="page__spotlight-label">Current emphasis</p>
+      <p>Separate workspaces, layered backend design, UML starters, and a proposal that can be exported to PDF.</p>
+    </div>
+  </div>
+
+  <div class="grid">
+    <article class="card" *ngFor="let card of milestoneCards">
+      <p class="card__label">{{ card.title }}</p>
+      <p class="card__text">{{ card.detail }}</p>
+    </article>
+  </div>
+
+  <article class="panel">
+    <p class="panel__title">Next PR candidates</p>
+    <ul class="panel__list">
+      <li *ngFor="let item of nextPrs">{{ item }}</li>
+    </ul>
+  </article>
+</section>
+

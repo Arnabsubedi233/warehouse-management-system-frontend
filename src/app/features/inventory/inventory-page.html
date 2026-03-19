@@ -1,0 +1,26 @@
+<section class="feature-page">
+  <article class="feature-page__intro">
+    <p class="feature-page__eyebrow">Inventory Management</p>
+    <h3>Use the inventory model to demonstrate clear business rules.</h3>
+    <p>
+      Inventory is one of the strongest places to show object-oriented design because stock rules belong inside the `StockItem` model rather than being scattered through controllers or UI code.
+    </p>
+  </article>
+
+  <div class="feature-grid">
+    <article class="feature-card">
+      <p class="feature-card__title">Business Rules</p>
+      <ul>
+        <li *ngFor="let item of businessRules">{{ item }}</li>
+      </ul>
+    </article>
+
+    <article class="feature-card">
+      <p class="feature-card__title">Testing Ideas</p>
+      <ul>
+        <li *ngFor="let item of testingIdeas">{{ item }}</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
