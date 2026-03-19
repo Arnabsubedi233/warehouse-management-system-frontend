@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { WarehouseApiService } from '../../core/warehouse-api.service';
-import { CreateSupplierRequest, Supplier } from '../../core/warehouse-models';
+import { CreateSupplierRequest, Supplier } from '../../interface/supplier.interface';
+import { WarehouseApiService } from '../../services/warehouse-api/warehouse-api.service';
 
 @Component({
   selector: 'app-suppliers-page',

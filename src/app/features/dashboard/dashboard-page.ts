@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { WarehouseApiService } from '../../core/warehouse-api.service';
-import { DashboardSummary } from '../../core/warehouse-models';
+import { DashboardSummary } from '../../interface/dashboard.interface';
+import { WarehouseApiService } from '../../services/warehouse-api/warehouse-api.service';
 
 @Component({
   selector: 'app-dashboard-page',
