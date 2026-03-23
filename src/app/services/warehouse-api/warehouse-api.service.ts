@@ -1,12 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { DashboardSummary } from '../../interface/dashboard.interface';
+import { FinanceSummary, FinancialTransaction } from '../../interface/finance.interface';
 import {
   CreateStockItemRequest,
   LowStockAlert,
   StockItem,
   UpdateStockItemRequest,
 } from '../../interface/inventory.interface';
+import {
+  CreateCustomerOrderRequest,
+  CustomerOrder,
+} from '../../interface/order.interface';
 import {
   CreateSupplierRequest,
   Supplier,
@@ -60,5 +65,29 @@ export class WarehouseApiService {
 
   receiveStock(stockItemId: string, quantity: number) {
     return this.http.post<StockItem>(`${this.apiBaseUrl}/inventory/${stockItemId}/receipts`, { quantity });
+  }
+
+  listOrders() {
+    return this.http.get<CustomerOrder[]>(`${this.apiBaseUrl}/orders`);
+  }
+
+  createOrder(request: CreateCustomerOrderRequest) {
+    return this.http.post<CustomerOrder>(`${this.apiBaseUrl}/orders`, request);
+  }
+
+  confirmOrder(orderId: string) {
+    return this.http.post<CustomerOrder>(`${this.apiBaseUrl}/orders/${orderId}/confirm`, {});
+  }
+
+  fulfillOrder(orderId: string) {
+    return this.http.post<CustomerOrder>(`${this.apiBaseUrl}/orders/${orderId}/fulfill`, {});
+  }
+
+  getFinanceSummary() {
+    return this.http.get<FinanceSummary>(`${this.apiBaseUrl}/finance/summary`);
+  }
+
+  listFinancialTransactions() {
+    return this.http.get<FinancialTransaction[]>(`${this.apiBaseUrl}/finance/transactions`);
   }
 }

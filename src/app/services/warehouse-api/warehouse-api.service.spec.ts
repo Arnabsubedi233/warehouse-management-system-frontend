@@ -6,8 +6,10 @@ import {
 import { provideHttpClient } from '@angular/common/http';
 import { WarehouseApiService } from './warehouse-api.service';
 import { DashboardSummary } from '../../interface/dashboard.interface';
+import { FinanceSummary } from '../../interface/finance.interface';
 import { CreateSupplierRequest } from '../../interface/supplier.interface';
 import { CreateStockItemRequest } from '../../interface/inventory.interface';
+import { CreateCustomerOrderRequest } from '../../interface/order.interface';
 
 describe('WarehouseApiService', () => {
   let service: WarehouseApiService;
@@ -180,5 +182,102 @@ describe('WarehouseApiService', () => {
       reorderThreshold: 20,
       status: 'NORMAL',
     });
+  });
+
+  it('should request the order list', () => {
+    service.listOrders().subscribe();
+
+    const request = httpTestingController.expectOne('/api/orders');
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
+  });
+
+  it('should create an order', () => {
+    const requestBody: CreateCustomerOrderRequest = {
+      customerName: 'Atlas Engineering',
+      orderLines: [
+        {
+          stockItemId: 'stock-1',
+          quantity: 5,
+          unitSalePrice: 4.5,
+        },
+      ],
+    };
+
+    service.createOrder(requestBody).subscribe();
+
+    const request = httpTestingController.expectOne('/api/orders');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(requestBody);
+    request.flush({
+      id: 'order-1',
+      status: 'DRAFT',
+      totalValue: 22.5,
+      ...requestBody,
+      orderLines: [
+        {
+          stockItemId: 'stock-1',
+          productName: 'Steel Bolts',
+          quantity: 5,
+          unitSalePrice: 4.5,
+          lineTotal: 22.5,
+        },
+      ],
+    });
+  });
+
+  it('should confirm an order', () => {
+    service.confirmOrder('order-1').subscribe();
+
+    const request = httpTestingController.expectOne('/api/orders/order-1/confirm');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({});
+    request.flush({
+      id: 'order-1',
+      customerName: 'Atlas Engineering',
+      status: 'CONFIRMED',
+      totalValue: 22.5,
+      orderLines: [],
+    });
+  });
+
+  it('should fulfill an order', () => {
+    service.fulfillOrder('order-1').subscribe();
+
+    const request = httpTestingController.expectOne('/api/orders/order-1/fulfill');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({});
+    request.flush({
+      id: 'order-1',
+      customerName: 'Atlas Engineering',
+      status: 'FULFILLED',
+      totalValue: 22.5,
+      orderLines: [],
+    });
+  });
+
+  it('should request the finance summary', () => {
+    const response: FinanceSummary = {
+      salesTotal: 1125,
+      purchaseTotal: 600,
+      netCashPosition: 525,
+      transactionCount: 4,
+    };
+
+    service.getFinanceSummary().subscribe((result) => {
+      expect(result).toEqual(response);
+    });
+
+    const request = httpTestingController.expectOne('/api/finance/summary');
+    expect(request.request.method).toBe('GET');
+    request.flush(response);
+  });
+
+  it('should request the financial transactions', () => {
+    service.listFinancialTransactions().subscribe();
+
+    const request = httpTestingController.expectOne('/api/finance/transactions');
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
   });
 });
