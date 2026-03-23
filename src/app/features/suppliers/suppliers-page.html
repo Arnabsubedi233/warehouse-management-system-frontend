@@ -3,7 +3,7 @@
     <div>
       <p class="page__eyebrow">Suppliers</p>
       <h3>Supplier management</h3>
-      <p>Create supplier records and manage whether they are active in the system.</p>
+      <p>Create supplier records, raise supplier purchase orders, and receive deliveries into stock.</p>
     </div>
   </header>
 
@@ -18,27 +18,27 @@
         <div class="form-grid">
           <label class="field field--full">
             <span>Supplier name</span>
-            <input name="name" [(ngModel)]="draft.name" required />
+            <input name="name" [(ngModel)]="supplierDraft.name" required />
           </label>
 
           <label class="field">
             <span>Contact name</span>
-            <input name="contactName" [(ngModel)]="draft.contactName" required />
+            <input name="contactName" [(ngModel)]="supplierDraft.contactName" required />
           </label>
 
           <label class="field">
             <span>Email</span>
-            <input name="email" type="email" [(ngModel)]="draft.email" required />
+            <input name="email" type="email" [(ngModel)]="supplierDraft.email" required />
           </label>
 
           <label class="field field--full">
             <span>Phone number</span>
-            <input name="phoneNumber" [(ngModel)]="draft.phoneNumber" required />
+            <input name="phoneNumber" [(ngModel)]="supplierDraft.phoneNumber" required />
           </label>
         </div>
 
         <div class="actions">
-          <button class="button" type="submit" [disabled]="saving || supplierForm.invalid">
+          <button class="button" type="submit" [disabled]="savingSupplier || supplierForm.invalid">
             Save supplier
           </button>
         </div>
@@ -99,6 +99,167 @@
 
       <ng-template #emptySuppliers>
         <p class="empty-state">No supplier records have been created yet.</p>
+      </ng-template>
+    </article>
+  </div>
+
+  <div class="panel-grid">
+    <article class="panel">
+      <h4>Create purchase order</h4>
+      <form class="form" (ngSubmit)="submitPurchaseOrder()">
+        <label class="field field--full">
+          <span>Supplier</span>
+          <select
+            name="selectedSupplierId"
+            [ngModel]="selectedSupplierId"
+            (ngModelChange)="onSupplierSelectionChange($event)"
+            required
+          >
+            <option value="" disabled>Select supplier</option>
+            <option *ngFor="let supplier of suppliers" [value]="supplier.id">
+              {{ supplier.name }}{{ supplier.active ? '' : ' (Inactive)' }}
+            </option>
+          </select>
+        </label>
+
+        <p class="empty-state" *ngIf="selectedSupplier && !selectedSupplier.active">
+          Purchase orders can only be created for active suppliers.
+        </p>
+
+        <p class="empty-state" *ngIf="selectedSupplier && selectedSupplierStockItems.length === 0">
+          No stock items are linked to this supplier yet.
+        </p>
+
+        <div class="order-lines" *ngIf="selectedSupplierStockItems.length > 0">
+          <section class="order-line" *ngFor="let line of purchaseOrderDraft.orderLines; let lineIndex = index">
+            <div class="order-line__header">
+              <h5>Line {{ lineIndex + 1 }}</h5>
+              <button
+                class="link-button link-button--danger"
+                type="button"
+                (click)="removePurchaseOrderLine(lineIndex)"
+                [disabled]="purchaseOrderDraft.orderLines.length === 1"
+              >
+                Remove
+              </button>
+            </div>
+
+            <div class="form-grid">
+              <label class="field field--full">
+                <span>Stock item</span>
+                <select
+                  [name]="'purchaseStockItemId-' + lineIndex"
+                  [(ngModel)]="line.stockItemId"
+                  (ngModelChange)="updatePurchaseOrderLineStockItem(lineIndex, $event)"
+                  required
+                >
+                  <option value="" disabled>Select stock item</option>
+                  <option *ngFor="let stockItem of selectedSupplierStockItems" [value]="stockItem.id">
+                    {{ stockItem.name }} ({{ stockItem.sku }})
+                  </option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Quantity</span>
+                <input
+                  [name]="'purchaseQuantity-' + lineIndex"
+                  type="number"
+                  min="1"
+                  step="1"
+                  [(ngModel)]="line.quantity"
+                  required
+                />
+              </label>
+
+              <label class="field">
+                <span>Unit cost</span>
+                <input
+                  [name]="'purchaseUnitCost-' + lineIndex"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  [(ngModel)]="line.unitCost"
+                  required
+                />
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <div class="actions">
+          <button class="button button--secondary" type="button" (click)="addPurchaseOrderLine()">
+            Add line
+          </button>
+          <button class="button" type="submit" [disabled]="savingPurchaseOrder || !canSubmitPurchaseOrder()">
+            Save purchase order
+          </button>
+        </div>
+      </form>
+    </article>
+
+    <article class="panel table-card">
+      <div class="panel__header">
+        <div>
+          <h4>Purchase order history</h4>
+          <p class="panel__subtitle" *ngIf="selectedSupplier">{{ selectedSupplier.name }}</p>
+        </div>
+        <span class="badge">{{ selectedSupplierPurchaseOrders.length }} orders</span>
+      </div>
+
+      <div class="table-wrap" *ngIf="selectedSupplierPurchaseOrders.length > 0; else emptyPurchaseOrders">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Ordered</th>
+              <th>Delivered</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Lines</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let purchaseOrder of selectedSupplierPurchaseOrders">
+              <td>{{ purchaseOrder.orderedOn | date: 'dd MMM yyyy' }}</td>
+              <td>{{ purchaseOrder.deliveredOn ? (purchaseOrder.deliveredOn | date: 'dd MMM yyyy') : 'Pending' }}</td>
+              <td>
+                <span
+                  class="stock-status"
+                  [class.stock-status--normal]="purchaseOrder.status === 'DELIVERED'"
+                  [class.stock-status--low]="purchaseOrder.status === 'IN_TRANSIT'"
+                  [class.pill--inactive]="purchaseOrder.status === 'PLACED'"
+                >
+                  {{ purchaseOrder.status }}
+                </span>
+              </td>
+              <td>{{ purchaseOrder.totalValue | currency: 'GBP' }}</td>
+              <td>{{ formatPurchaseOrderSummary(purchaseOrder) }}</td>
+              <td class="table__actions">
+                <button
+                  class="link-button"
+                  type="button"
+                  (click)="dispatchPurchaseOrder(purchaseOrder)"
+                  [disabled]="purchaseOrder.status !== 'PLACED' || busyPurchaseOrderId === purchaseOrder.id"
+                >
+                  Dispatch
+                </button>
+                <button
+                  class="link-button"
+                  type="button"
+                  (click)="receiveDelivery(purchaseOrder)"
+                  [disabled]="purchaseOrder.status === 'DELIVERED' || busyPurchaseOrderId === purchaseOrder.id"
+                >
+                  Receive delivery
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #emptyPurchaseOrders>
+        <p class="empty-state">No purchase orders exist for the selected supplier.</p>
       </ng-template>
     </article>
   </div>

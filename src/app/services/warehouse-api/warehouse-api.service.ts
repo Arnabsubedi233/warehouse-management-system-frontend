@@ -14,7 +14,9 @@ import {
 } from '../../interface/order.interface';
 import {
   CreateSupplierRequest,
+  CreateSupplierPurchaseOrderRequest,
   Supplier,
+  SupplierPurchaseOrder,
   UpdateSupplierRequest,
 } from '../../interface/supplier.interface';
 
@@ -45,6 +47,26 @@ export class WarehouseApiService {
 
   deleteSupplier(supplierId: string) {
     return this.http.delete<void>(`${this.apiBaseUrl}/suppliers/${supplierId}`);
+  }
+
+  listPurchaseOrders() {
+    return this.http.get<SupplierPurchaseOrder[]>(`${this.apiBaseUrl}/purchase-orders`);
+  }
+
+  listSupplierPurchaseOrders(supplierId: string) {
+    return this.http.get<SupplierPurchaseOrder[]>(`${this.apiBaseUrl}/suppliers/${supplierId}/purchase-orders`);
+  }
+
+  createSupplierPurchaseOrder(supplierId: string, request: CreateSupplierPurchaseOrderRequest) {
+    return this.http.post<SupplierPurchaseOrder>(`${this.apiBaseUrl}/suppliers/${supplierId}/purchase-orders`, request);
+  }
+
+  dispatchPurchaseOrder(purchaseOrderId: string) {
+    return this.http.post<SupplierPurchaseOrder>(`${this.apiBaseUrl}/purchase-orders/${purchaseOrderId}/dispatch`, {});
+  }
+
+  receivePurchaseOrderDelivery(purchaseOrderId: string) {
+    return this.http.post<SupplierPurchaseOrder>(`${this.apiBaseUrl}/purchase-orders/${purchaseOrderId}/deliveries`, {});
   }
 
   listStockItems() {
