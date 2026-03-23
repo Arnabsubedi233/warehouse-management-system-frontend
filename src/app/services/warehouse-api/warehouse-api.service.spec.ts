@@ -7,7 +7,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { WarehouseApiService } from './warehouse-api.service';
 import { DashboardSummary } from '../../interface/dashboard.interface';
 import { FinanceSummary } from '../../interface/finance.interface';
-import { CreateSupplierRequest } from '../../interface/supplier.interface';
+import {
+  CreateSupplierPurchaseOrderRequest,
+  CreateSupplierRequest,
+} from '../../interface/supplier.interface';
 import { CreateStockItemRequest } from '../../interface/inventory.interface';
 import { CreateCustomerOrderRequest } from '../../interface/order.interface';
 
@@ -99,6 +102,94 @@ describe('WarehouseApiService', () => {
     const request = httpTestingController.expectOne('/api/suppliers/sup-1');
     expect(request.request.method).toBe('DELETE');
     request.flush(null);
+  });
+
+  it('should request the purchase order list', () => {
+    service.listPurchaseOrders().subscribe();
+
+    const request = httpTestingController.expectOne('/api/purchase-orders');
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
+  });
+
+  it('should request the purchase order list for a supplier', () => {
+    service.listSupplierPurchaseOrders('sup-1').subscribe();
+
+    const request = httpTestingController.expectOne('/api/suppliers/sup-1/purchase-orders');
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
+  });
+
+  it('should create a supplier purchase order', () => {
+    const requestBody: CreateSupplierPurchaseOrderRequest = {
+      orderLines: [
+        {
+          stockItemId: 'stock-1',
+          quantity: 20,
+          unitCost: 2.4,
+        },
+      ],
+    };
+
+    service.createSupplierPurchaseOrder('sup-1', requestBody).subscribe();
+
+    const request = httpTestingController.expectOne('/api/suppliers/sup-1/purchase-orders');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(requestBody);
+    request.flush({
+      id: 'po-1',
+      supplierId: 'sup-1',
+      supplierName: 'Acme Supplies',
+      orderedOn: '2026-03-23',
+      deliveredOn: null,
+      status: 'PLACED',
+      totalValue: 48,
+      orderLines: [
+        {
+          stockItemId: 'stock-1',
+          productName: 'Steel Bolts',
+          quantity: 20,
+          unitCost: 2.4,
+          lineTotal: 48,
+        },
+      ],
+    });
+  });
+
+  it('should dispatch a purchase order', () => {
+    service.dispatchPurchaseOrder('po-1').subscribe();
+
+    const request = httpTestingController.expectOne('/api/purchase-orders/po-1/dispatch');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({});
+    request.flush({
+      id: 'po-1',
+      supplierId: 'sup-1',
+      supplierName: 'Acme Supplies',
+      orderedOn: '2026-03-23',
+      deliveredOn: null,
+      status: 'IN_TRANSIT',
+      totalValue: 48,
+      orderLines: [],
+    });
+  });
+
+  it('should receive a purchase order delivery', () => {
+    service.receivePurchaseOrderDelivery('po-1').subscribe();
+
+    const request = httpTestingController.expectOne('/api/purchase-orders/po-1/deliveries');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({});
+    request.flush({
+      id: 'po-1',
+      supplierId: 'sup-1',
+      supplierName: 'Acme Supplies',
+      orderedOn: '2026-03-23',
+      deliveredOn: '2026-03-25',
+      status: 'DELIVERED',
+      totalValue: 48,
+      orderLines: [],
+    });
   });
 
   it('should create a stock item', () => {
