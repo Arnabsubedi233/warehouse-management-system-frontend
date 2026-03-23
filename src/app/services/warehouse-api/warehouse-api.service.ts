@@ -1,7 +1,11 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { DashboardSummary } from '../../interface/dashboard.interface';
-import { FinanceSummary, FinancialTransaction } from '../../interface/finance.interface';
+import {
+  FinanceReportFilter,
+  FinanceSummary,
+  FinancialTransaction,
+} from '../../interface/finance.interface';
 import {
   CreateStockItemRequest,
   LowStockAlert,
@@ -105,11 +109,33 @@ export class WarehouseApiService {
     return this.http.post<CustomerOrder>(`${this.apiBaseUrl}/orders/${orderId}/fulfill`, {});
   }
 
-  getFinanceSummary() {
-    return this.http.get<FinanceSummary>(`${this.apiBaseUrl}/finance/summary`);
+  getFinanceSummary(filters?: FinanceReportFilter) {
+    return this.http.get<FinanceSummary>(`${this.apiBaseUrl}/finance/summary`, {
+      params: this.buildFinanceParams(filters)
+    });
   }
 
-  listFinancialTransactions() {
-    return this.http.get<FinancialTransaction[]>(`${this.apiBaseUrl}/finance/transactions`);
+  listFinancialTransactions(filters?: FinanceReportFilter) {
+    return this.http.get<FinancialTransaction[]>(`${this.apiBaseUrl}/finance/transactions`, {
+      params: this.buildFinanceParams(filters)
+    });
+  }
+
+  private buildFinanceParams(filters?: FinanceReportFilter): HttpParams {
+    let params = new HttpParams();
+    if (!filters) {
+      return params;
+    }
+
+    if (filters.from) {
+      params = params.set('from', filters.from);
+    }
+    if (filters.to) {
+      params = params.set('to', filters.to);
+    }
+    if (filters.transactionType && filters.transactionType !== 'ALL') {
+      params = params.set('transactionType', filters.transactionType);
+    }
+    return params;
   }
 }

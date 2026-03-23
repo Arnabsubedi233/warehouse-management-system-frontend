@@ -1,3 +1,5 @@
+export type FinanceTransactionType = 'PURCHASE' | 'SALE';
+
 export interface FinanceSummary {
   salesTotal: number;
   purchaseTotal: number;
@@ -11,5 +13,11 @@ export interface FinancialTransaction {
   occurredOn: string;
   amount: number;
   signedAmount: number;
-  transactionType: 'PURCHASE' | 'SALE';
+  transactionType: FinanceTransactionType;
+}
+
+export interface FinanceReportFilter {
+  from: string;
+  to: string;
+  transactionType: FinanceTransactionType | 'ALL';
 }
