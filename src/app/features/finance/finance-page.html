@@ -3,13 +3,87 @@
     <div>
       <p class="page__eyebrow">Finance</p>
       <h3>Financial reporting</h3>
-      <p>{{ statusMessage }}</p>
+      <p>Review sales, purchases, net cash position, and the recorded transaction history.</p>
     </div>
+    <button class="button button--secondary" type="button" (click)="loadFinance()" [disabled]="loading">
+      Refresh
+    </button>
   </header>
 
-  <article class="panel">
-    <p class="empty-state">
-      Dedicated finance screens will be added here once the service exposes the remaining finance endpoints.
-    </p>
+  <p class="notice notice--error" *ngIf="error">{{ error }}</p>
+  <p class="empty-state" *ngIf="loading">Loading finance data...</p>
+
+  <div class="metric-grid" *ngIf="summary as data">
+    <article class="metric">
+      <p class="metric__label">Sales Total</p>
+      <p class="metric__value">{{ data.salesTotal | currency: 'GBP' }}</p>
+      <p class="metric__hint">Total recorded sale transactions.</p>
+    </article>
+
+    <article class="metric">
+      <p class="metric__label">Purchase Total</p>
+      <p class="metric__value">{{ data.purchaseTotal | currency: 'GBP' }}</p>
+      <p class="metric__hint">Total recorded purchase transactions.</p>
+    </article>
+
+    <article class="metric">
+      <p class="metric__label">Net Cash Position</p>
+      <p class="metric__value">{{ data.netCashPosition | currency: 'GBP' }}</p>
+      <p class="metric__hint">Net total after applying transaction type.</p>
+    </article>
+
+    <article class="metric">
+      <p class="metric__label">Transactions</p>
+      <p class="metric__value">{{ data.transactionCount }}</p>
+      <p class="metric__hint">Financial entries currently recorded.</p>
+    </article>
+  </div>
+
+  <article class="panel table-card">
+    <div class="panel__header">
+      <h4>Transaction history</h4>
+      <span class="badge">{{ transactions.length }} entries</span>
+    </div>
+
+    <div class="table-wrap" *ngIf="transactions.length > 0; else noTransactions">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Effect</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let transaction of transactions">
+            <td>{{ transaction.occurredOn }}</td>
+            <td>{{ transaction.description }}</td>
+            <td>
+              <span
+                class="stock-status"
+                [class.stock-status--normal]="transaction.transactionType === 'SALE'"
+                [class.stock-status--out-of-stock]="transaction.transactionType === 'PURCHASE'"
+              >
+                {{ transaction.transactionType }}
+              </span>
+            </td>
+            <td>{{ transaction.amount | currency: 'GBP' }}</td>
+            <td
+              class="finance-effect"
+              [class.finance-effect--positive]="transaction.signedAmount >= 0"
+              [class.finance-effect--negative]="transaction.signedAmount < 0"
+            >
+              {{ transaction.signedAmount | currency: 'GBP' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #noTransactions>
+      <p class="empty-state">No financial transactions are currently available.</p>
+    </ng-template>
   </article>
 </section>

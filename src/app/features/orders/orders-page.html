@@ -3,13 +3,142 @@
     <div>
       <p class="page__eyebrow">Orders</p>
       <h3>Order processing</h3>
-      <p>{{ statusMessage }}</p>
+      <p>Create customer orders, confirm them, and fulfil them against the current stock levels.</p>
     </div>
   </header>
 
-  <article class="panel">
-    <p class="empty-state">
-      The order workflow screen will be connected here as soon as the corresponding backend endpoints are available.
-    </p>
-  </article>
+  <p class="notice notice--error" *ngIf="error">{{ error }}</p>
+  <p class="notice notice--success" *ngIf="success">{{ success }}</p>
+  <p class="empty-state" *ngIf="loading">Loading orders...</p>
+
+  <div class="panel-grid">
+    <article class="panel">
+      <h4>Create order</h4>
+      <form class="form" (ngSubmit)="submitOrder()">
+        <label class="field field--full">
+          <span>Customer name</span>
+          <input name="customerName" [(ngModel)]="draft.customerName" required />
+        </label>
+
+        <div class="order-lines">
+          <section class="order-line" *ngFor="let line of draft.orderLines; let lineIndex = index">
+            <div class="order-line__header">
+              <h5>Line {{ lineIndex + 1 }}</h5>
+              <button
+                class="link-button link-button--danger"
+                type="button"
+                (click)="removeLine(lineIndex)"
+                [disabled]="draft.orderLines.length === 1"
+              >
+                Remove
+              </button>
+            </div>
+
+            <div class="form-grid">
+              <label class="field field--full">
+                <span>Stock item</span>
+                <select
+                  [name]="'stockItemId-' + lineIndex"
+                  [(ngModel)]="line.stockItemId"
+                  (ngModelChange)="updateDraftLineStockItem(lineIndex, $event)"
+                  required
+                >
+                  <option value="" disabled>Select stock item</option>
+                  <option *ngFor="let stockItem of stockItems" [value]="stockItem.id">
+                    {{ stockItem.name }} ({{ stockItem.sku }})
+                  </option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Quantity</span>
+                <input [name]="'quantity-' + lineIndex" type="number" min="1" step="1" [(ngModel)]="line.quantity" required />
+              </label>
+
+              <label class="field">
+                <span>Unit sale price</span>
+                <input
+                  [name]="'unitSalePrice-' + lineIndex"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  [(ngModel)]="line.unitSalePrice"
+                  required
+                />
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <div class="actions">
+          <button class="button button--secondary" type="button" (click)="addLine()">
+            Add line
+          </button>
+          <button class="button" type="submit" [disabled]="saving || !canSubmitOrder()">
+            Save order
+          </button>
+        </div>
+      </form>
+    </article>
+
+    <article class="panel table-card">
+      <div class="panel__header">
+        <h4>Customer orders</h4>
+        <span class="badge">{{ orders.length }} orders</span>
+      </div>
+
+      <div class="table-wrap" *ngIf="orders.length > 0; else noOrders">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Lines</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of orders">
+              <td>{{ order.customerName }}</td>
+              <td>
+                <span
+                  class="stock-status"
+                  [class.stock-status--normal]="order.status === 'FULFILLED'"
+                  [class.stock-status--low]="order.status === 'CONFIRMED'"
+                  [class.pill--inactive]="order.status === 'DRAFT'"
+                >
+                  {{ order.status }}
+                </span>
+              </td>
+              <td>{{ order.totalValue | currency: 'GBP' }}</td>
+              <td>{{ formatLineSummary(order) }}</td>
+              <td class="table__actions">
+                <button
+                  class="link-button"
+                  type="button"
+                  (click)="confirmOrder(order)"
+                  [disabled]="order.status !== 'DRAFT' || busyOrderId === order.id"
+                >
+                  Confirm
+                </button>
+                <button
+                  class="link-button"
+                  type="button"
+                  (click)="fulfillOrder(order)"
+                  [disabled]="order.status !== 'CONFIRMED' || busyOrderId === order.id"
+                >
+                  Fulfil
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #noOrders>
+        <p class="empty-state">No customer orders have been created yet.</p>
+      </ng-template>
+    </article>
+  </div>
 </section>

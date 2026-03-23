@@ -1,3 +1,15 @@
 :host {
   display: block;
 }
+
+.finance-effect {
+  font-weight: 700;
+}
+
+.finance-effect--positive {
+  color: #175e51;
+}
+
+.finance-effect--negative {
+  color: #9d3e24;
+}
