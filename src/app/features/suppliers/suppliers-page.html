@@ -13,7 +13,14 @@
 
   <div class="panel-grid">
     <article class="panel">
-      <h4>Add supplier</h4>
+      <div class="panel__header panel__header--stack">
+        <div>
+          <h4>{{ isEditingSupplier ? 'Edit supplier' : 'Add supplier' }}</h4>
+          <p class="panel__subtitle" *ngIf="isEditingSupplier && editingSupplier">
+            Updating {{ editingSupplier.name }}.
+          </p>
+        </div>
+      </div>
       <form class="form" (ngSubmit)="submitSupplier()" #supplierForm="ngForm">
         <div class="form-grid">
           <label class="field field--full">
@@ -39,7 +46,10 @@
 
         <div class="actions">
           <button class="button" type="submit" [disabled]="savingSupplier || supplierForm.invalid">
-            Save supplier
+            {{ isEditingSupplier ? 'Update supplier' : 'Save supplier' }}
+          </button>
+          <button class="button button--secondary" type="button" *ngIf="isEditingSupplier" (click)="cancelSupplierEdit()">
+            Cancel
           </button>
         </div>
       </form>
@@ -78,6 +88,14 @@
                 <button
                   class="link-button"
                   type="button"
+                  (click)="beginEditSupplier(supplier)"
+                  [disabled]="busySupplierId === supplier.id"
+                >
+                  Edit
+                </button>
+                <button
+                  class="link-button"
+                  type="button"
                   (click)="toggleStatus(supplier)"
                   [disabled]="busySupplierId === supplier.id"
                 >
@@ -87,7 +105,7 @@
                   class="link-button link-button--danger"
                   type="button"
                   (click)="deleteSupplier(supplier)"
-                  [disabled]="busySupplierId === supplier.id"
+                  [disabled]="busySupplierId === supplier.id || isEditingSupplier && editingSupplier?.id === supplier.id"
                 >
                   Delete
                 </button>

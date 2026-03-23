@@ -13,12 +13,19 @@
 
   <div class="panel-grid">
     <article class="panel">
-      <h4>Add stock item</h4>
+      <div class="panel__header panel__header--stack">
+        <div>
+          <h4>{{ isEditingStockItem ? 'Edit stock item' : 'Add stock item' }}</h4>
+          <p class="panel__subtitle" *ngIf="isEditingStockItem && editingStockItem">
+            Updating {{ editingStockItem.name }}. Use the receive stock action below to change quantity on hand.
+          </p>
+        </div>
+      </div>
       <form class="form" (ngSubmit)="submitStockItem()" #stockForm="ngForm">
         <div class="form-grid">
           <label class="field">
             <span>SKU</span>
-            <input name="sku" [(ngModel)]="draft.sku" required />
+            <input name="sku" [(ngModel)]="draft.sku" [readonly]="isEditingStockItem" [disabled]="isEditingStockItem" required />
           </label>
 
           <label class="field">
@@ -43,7 +50,16 @@
 
           <label class="field">
             <span>Opening quantity</span>
-            <input name="quantityOnHand" type="number" min="0" step="1" [(ngModel)]="draft.quantityOnHand" required />
+            <input
+              name="quantityOnHand"
+              type="number"
+              min="0"
+              step="1"
+              [(ngModel)]="draft.quantityOnHand"
+              [readonly]="isEditingStockItem"
+              [disabled]="isEditingStockItem"
+              required
+            />
           </label>
 
           <label class="field field--full">
@@ -54,7 +70,10 @@
 
         <div class="actions">
           <button class="button" type="submit" [disabled]="saving || stockForm.invalid">
-            Save item
+            {{ isEditingStockItem ? 'Update item' : 'Save item' }}
+          </button>
+          <button class="button button--secondary" type="button" *ngIf="isEditingStockItem" (click)="cancelEditStockItem()">
+            Cancel
           </button>
         </div>
       </form>
@@ -120,7 +139,7 @@
             <th>Unit Cost</th>
             <th>Quantity</th>
             <th>Status</th>
-            <th>Receive Stock</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -140,7 +159,15 @@
                 {{ stockItem.status }}
               </span>
             </td>
-            <td>
+            <td class="table__actions">
+              <button
+                class="link-button"
+                type="button"
+                (click)="beginEditStockItem(stockItem)"
+                [disabled]="busyStockItemId === stockItem.id"
+              >
+                Edit
+              </button>
               <div class="inline-receipt">
                 <input
                   type="number"
@@ -150,7 +177,12 @@
                   [ngModelOptions]="{ standalone: true }"
                   placeholder="Qty"
                 />
-                <button class="link-button" type="button" (click)="receiveStock(stockItem)">
+                <button
+                  class="link-button"
+                  type="button"
+                  (click)="receiveStock(stockItem)"
+                  [disabled]="busyStockItemId === stockItem.id"
+                >
                   Receive
                 </button>
               </div>

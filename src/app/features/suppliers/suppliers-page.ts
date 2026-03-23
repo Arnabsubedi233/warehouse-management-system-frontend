@@ -22,6 +22,7 @@ export class SuppliersPageComponent implements OnInit {
   protected loading = true;
   protected savingSupplier = false;
   protected savingPurchaseOrder = false;
+  protected editingSupplierId = '';
   protected busySupplierId = '';
   protected busyPurchaseOrderId = '';
   protected selectedSupplierId = '';
@@ -57,6 +58,9 @@ export class SuppliersPageComponent implements OnInit {
         this.purchaseOrders = [...purchaseOrders].sort((left, right) =>
           right.orderedOn.localeCompare(left.orderedOn)
         );
+        if (this.editingSupplierId && !suppliers.some((supplier) => supplier.id === this.editingSupplierId)) {
+          this.resetSupplierDraft();
+        }
         this.ensureSelectedSupplier();
         this.loading = false;
       },
@@ -71,23 +75,48 @@ export class SuppliersPageComponent implements OnInit {
     this.savingSupplier = true;
     this.error = '';
     this.success = '';
-    this.warehouseApiService.createSupplier(this.supplierDraft).subscribe({
+    const editingSupplier = this.editingSupplier;
+    const request = editingSupplier
+      ? this.warehouseApiService.updateSupplier(editingSupplier.id, {
+          ...this.supplierDraft,
+          active: editingSupplier.active
+        })
+      : this.warehouseApiService.createSupplier(this.supplierDraft);
+
+    request.subscribe({
       next: () => {
-        this.supplierDraft = {
-          name: '',
-          contactName: '',
-          email: '',
-          phoneNumber: ''
-        };
-        this.success = 'Supplier saved successfully.';
+        this.success = editingSupplier
+          ? 'Supplier updated successfully.'
+          : 'Supplier saved successfully.';
         this.savingSupplier = false;
+        this.resetSupplierDraft();
         this.loadData();
       },
       error: () => {
-        this.error = 'The supplier could not be saved.';
+        this.error = editingSupplier
+          ? 'The supplier could not be updated.'
+          : 'The supplier could not be saved.';
         this.savingSupplier = false;
       }
     });
+  }
+
+  protected beginEditSupplier(supplier: Supplier): void {
+    this.editingSupplierId = supplier.id;
+    this.error = '';
+    this.success = '';
+    this.supplierDraft = {
+      name: supplier.name,
+      contactName: supplier.contactName,
+      email: supplier.email,
+      phoneNumber: supplier.phoneNumber
+    };
+  }
+
+  protected cancelSupplierEdit(): void {
+    this.resetSupplierDraft();
+    this.error = '';
+    this.success = '';
   }
 
   protected toggleStatus(supplier: Supplier): void {
@@ -132,6 +161,14 @@ export class SuppliersPageComponent implements OnInit {
         this.busySupplierId = '';
       }
     });
+  }
+
+  protected get isEditingSupplier(): boolean {
+    return this.editingSupplierId !== '';
+  }
+
+  protected get editingSupplier(): Supplier | undefined {
+    return this.suppliers.find((supplier) => supplier.id === this.editingSupplierId);
   }
 
   protected get selectedSupplier(): Supplier | undefined {
@@ -262,6 +299,16 @@ export class SuppliersPageComponent implements OnInit {
     }
     this.selectedSupplierId = this.suppliers[0]?.id ?? '';
     this.resetPurchaseOrderDraft();
+  }
+
+  private resetSupplierDraft(): void {
+    this.editingSupplierId = '';
+    this.supplierDraft = {
+      name: '',
+      contactName: '',
+      email: '',
+      phoneNumber: ''
+    };
   }
 
   private resetPurchaseOrderDraft(): void {
