@@ -3,7 +3,7 @@
     <div>
       <p class="page__eyebrow">Finance</p>
       <h3>Financial reporting</h3>
-      <p>Review sales, purchases, net cash position, and the recorded transaction history.</p>
+      <p>Review sales, purchases, net cash position, and transaction history by reporting period.</p>
     </div>
     <button class="button button--secondary" type="button" (click)="loadFinance()" [disabled]="loading">
       Refresh
@@ -12,6 +12,45 @@
 
   <p class="notice notice--error" *ngIf="error">{{ error }}</p>
   <p class="empty-state" *ngIf="loading">Loading finance data...</p>
+
+  <article class="panel finance-filters">
+    <div class="panel__header panel__header--stack">
+      <div>
+        <h4>Report filters</h4>
+        <p class="panel__subtitle">Use a date range and transaction type to produce a simple finance report.</p>
+      </div>
+    </div>
+
+    <form class="form" (ngSubmit)="applyFilters()">
+      <div class="form-grid">
+        <label class="field">
+          <span>From</span>
+          <input name="from" type="date" [(ngModel)]="filters.from" required />
+        </label>
+
+        <label class="field">
+          <span>To</span>
+          <input name="to" type="date" [(ngModel)]="filters.to" required />
+        </label>
+
+        <label class="field">
+          <span>Transaction type</span>
+          <select name="transactionType" [(ngModel)]="filters.transactionType">
+            <option value="ALL">All transactions</option>
+            <option value="SALE">Sales only</option>
+            <option value="PURCHASE">Purchases only</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="button" type="submit" [disabled]="loading">Apply filters</button>
+        <button class="button button--secondary" type="button" (click)="resetFilters()" [disabled]="loading">
+          Current month
+        </button>
+      </div>
+    </form>
+  </article>
 
   <div class="metric-grid" *ngIf="summary as data">
     <article class="metric">
@@ -41,7 +80,10 @@
 
   <article class="panel table-card">
     <div class="panel__header">
-      <h4>Transaction history</h4>
+      <div>
+        <h4>Transaction history</h4>
+        <p class="panel__subtitle">{{ filterDescription }}</p>
+      </div>
       <span class="badge">{{ transactions.length }} entries</span>
     </div>
 

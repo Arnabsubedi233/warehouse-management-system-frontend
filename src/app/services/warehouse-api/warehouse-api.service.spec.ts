@@ -6,7 +6,7 @@ import {
 import { provideHttpClient } from '@angular/common/http';
 import { WarehouseApiService } from './warehouse-api.service';
 import { DashboardSummary } from '../../interface/dashboard.interface';
-import { FinanceSummary } from '../../interface/finance.interface';
+import { FinanceReportFilter, FinanceSummary } from '../../interface/finance.interface';
 import {
   CreateSupplierPurchaseOrderRequest,
   CreateSupplierRequest,
@@ -364,10 +364,43 @@ describe('WarehouseApiService', () => {
     request.flush(response);
   });
 
+  it('should request the filtered finance summary', () => {
+    const filters: FinanceReportFilter = {
+      from: '2026-03-01',
+      to: '2026-03-31',
+      transactionType: 'PURCHASE',
+    };
+
+    service.getFinanceSummary(filters).subscribe();
+
+    const request = httpTestingController.expectOne('/api/finance/summary?from=2026-03-01&to=2026-03-31&transactionType=PURCHASE');
+    expect(request.request.method).toBe('GET');
+    request.flush({
+      salesTotal: 0,
+      purchaseTotal: 600,
+      netCashPosition: -600,
+      transactionCount: 2,
+    });
+  });
+
   it('should request the financial transactions', () => {
     service.listFinancialTransactions().subscribe();
 
     const request = httpTestingController.expectOne('/api/finance/transactions');
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
+  });
+
+  it('should request filtered financial transactions', () => {
+    const filters: FinanceReportFilter = {
+      from: '2026-03-12',
+      to: '2026-03-12',
+      transactionType: 'SALE',
+    };
+
+    service.listFinancialTransactions(filters).subscribe();
+
+    const request = httpTestingController.expectOne('/api/finance/transactions?from=2026-03-12&to=2026-03-12&transactionType=SALE');
     expect(request.request.method).toBe('GET');
     request.flush([]);
   });
